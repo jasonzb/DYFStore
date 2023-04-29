@@ -644,13 +644,24 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
     public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         DYFStoreLog("The payment queue has finished sending restored transactions")
         
-        let userInfo = [NSLocalizedDescriptionKey: "您没有可恢复购买的项目"]
-        let err = NSError(domain: "xds.appgamesapp.com", code: -1, userInfo: userInfo)
-        var info = DYFStore.NotificationInfo()
-        info.state = DYFStore.PurchaseState.restoreFailed
-        info.error = err
+        var restoredTransactions = false
+            
+        for transaction in queue.transactions {
+            if transaction.transactionState == .restored {
+                restoredTransactions = true
+                break
+            }
+        }
         
-        self.postNotification(info)
+        if !restoredTransactions {
+            let userInfo = [NSLocalizedDescriptionKey: "您没有可恢复购买的项目"]
+            let err = NSError(domain: "xds.appgamesapp.com", code: -1, userInfo: userInfo)
+            var info = DYFStore.NotificationInfo()
+            info.state = DYFStore.PurchaseState.restoreFailed
+            info.error = err
+            
+            self.postNotification(info)
+        }
     }
     
     // Tells the observer that an error occurred while restoring transactions.
