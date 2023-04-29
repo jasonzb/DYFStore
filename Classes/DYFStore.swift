@@ -643,6 +643,14 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
     // Tells the observer that the payment queue has finished sending restored transactions.
     public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         DYFStoreLog("The payment queue has finished sending restored transactions")
+        
+        let userInfo = [NSLocalizedDescriptionKey: "您没有可恢复购买的项目"]
+        let err = NSError(domain: "xds.appgamesapp.com", code: -1, userInfo: userInfo)
+        var info = DYFStore.NotificationInfo()
+        info.state = DYFStore.PurchaseState.restoreFailed
+        info.error = err
+        
+        self.postNotification(info)
     }
     
     // Tells the observer that an error occurred while restoring transactions.
