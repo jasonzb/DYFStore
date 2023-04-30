@@ -611,8 +611,8 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
                 break
             }
         }
-        if let latestTransaction = latestRestoredTransaction(restoredTransactions) {
-            self.didRestoreTransaction(latestTransaction, queue: queue)
+        if let latestRestoredTransaction = latestRestoredTransaction(restoredTransactions) {
+            self.didRestoreTransaction(latestRestoredTransaction, queue: queue)
         }
     }
     
