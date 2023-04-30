@@ -943,6 +943,7 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
             if let latestDate = latestTransaction?.transactionDate,
                let currentDate = transaction.transactionDate,
                currentDate.compare(latestDate) == .orderedDescending {
+                SKPaymentQueue.default().finishTransaction(latestTransaction!)
                 latestTransaction = transaction
             } else if latestTransaction == nil {
                 latestTransaction = transaction
