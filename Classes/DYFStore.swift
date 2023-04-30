@@ -588,6 +588,7 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
     
     // Tells an observer that one or more transactions have been updated.
     public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+        var restoredTransactions: [SKPaymentTransaction] = []
         for transaction in transactions {
             switch transaction.transactionState {
             case .purchasing:
@@ -600,7 +601,7 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
                 self.didFailWithTransaction(transaction, queue: queue, error: transaction.error! as NSError)
                 break
             case .restored:
-                self.didRestoreTransaction(transaction, queue: queue)
+                restoredTransactions.append(transaction)
                 break
             case .deferred:
                 self.didDeferTransaction(transaction, queue: queue)
@@ -609,6 +610,9 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
                 DYFStoreLog("Unknown transaction state")
                 break
             }
+        }
+        if let latestTransaction = latestRestoredTransaction(restoredTransactions) {
+            self.didRestoreTransaction(latestTransaction, queue: queue)
         }
     }
     
@@ -930,6 +934,22 @@ open class DYFStore: NSObject, SKProductsRequestDelegate, SKPaymentTransactionOb
         }
         
         return state
+    }
+    
+    private func latestRestoredTransaction(_ restoredTransactions: [SKPaymentTransaction]) -> SKPaymentTransaction? {
+        var latestTransaction: SKPaymentTransaction?
+        
+        for transaction in restoredTransactions {
+            if let latestDate = latestTransaction?.transactionDate,
+               let currentDate = transaction.transactionDate,
+               currentDate.compare(latestDate) == .orderedDescending {
+                latestTransaction = transaction
+            } else if latestTransaction == nil {
+                latestTransaction = transaction
+            }
+        }
+        
+        return latestTransaction
     }
     
     /// Whether there are pending downloads in the transaction.
